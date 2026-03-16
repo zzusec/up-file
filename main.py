@@ -502,7 +502,9 @@ async def list_files(request: Request):
 
 @app.get("/download/{key:path}")
 async def download_file(request: Request, key: str):
-    if not request.state.is_authorized:
+    # 允许 public/ 目录下的文件公开下载，其他文件需要认证
+    is_public = key.startswith("public/")
+    if not request.state.is_authorized and not is_public:
         raise HTTPException(status_code=HTTP_403_FORBIDDEN, detail="未授权访问下载链接")
     
     object = await bucket.get(key)
