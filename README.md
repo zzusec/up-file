@@ -16,13 +16,17 @@
 -   **容器化部署**：提供 Docker 和 Docker Compose 配置，实现快速部署和环境隔离。
 -   **持久化存储**：文件和配置数据存储在本地文件系统，通过 Docker 卷挂载实现数据持久化。
 
-## 🚀 快速部署
+## 🚀 部署方式
 
-### 前提条件
+本项目支持两种部署方式：**Docker 部署**（适用于自有服务器）和 **Cloudflare Worker 部署**（适用于无服务器环境）。
+
+### 方式一：Docker 部署 (推荐用于自有服务器)
+
+#### 前提条件
 
 确保您的服务器已安装 Docker 和 Docker Compose。
 
-### 步骤
+#### 步骤
 
 1.  **克隆仓库**：
     ```bash
@@ -38,6 +42,48 @@
 
 3.  **访问应用**：
     服务启动后，您可以通过浏览器访问 `http://您的服务器IP或域名:8399`。
+
+### 方式二：Cloudflare Worker 部署 (推荐用于无服务器环境)
+
+#### 前提条件
+
+1.  拥有一个 Cloudflare 账号。
+2.  已配置 Cloudflare R2 存储桶。
+3.  已安装 `wrangler` CLI 工具。
+
+#### 步骤
+
+1.  **获取 Worker 脚本**：
+    项目根目录下的 `cloudflare_worker.js` 即为 Cloudflare Worker 脚本。
+
+2.  **配置 `wrangler.toml`** (示例，请根据您的实际情况修改):
+    ```toml
+    name = "your-file-manager-worker"
+    main = "cloudflare_worker.js"
+    compatibility_date = "2024-01-01"
+
+    [vars]
+    DEFAULT_PASSWORD = "password" # 您的管理员密码
+
+    [[r2_buckets]]
+    binding = "MY_BUCKET" # 对应 worker.js 中的 BUCKET_BINDING
+    bucket_name = "您的R2桶名称"
+    preview_bucket_name = "您的R2桶名称"
+    ```
+
+3.  **部署 Worker**：
+    ```bash
+    wrangler deploy
+    ```
+
+4.  **访问应用**：
+    部署成功后，通过您的 Worker 域名访问。
+
+#### 注意事项
+
+-   Cloudflare Worker 部署方式中，文件和配置数据存储在 Cloudflare R2 存储桶中。
+-   `DEFAULT_PASSWORD` 变量需要在 `wrangler.toml` 中配置，或通过 Cloudflare Worker 控制台设置环境变量。
+-   `BUCKET_BINDING` 变量应与 `wrangler.toml` 中 `[[r2_buckets]]` 下的 `binding` 名称一致。
 
 ## ⚙️ 配置说明
 
@@ -85,10 +131,11 @@
 
 ## 🛠️ 技术栈
 
--   **后端**：Python 3.9+, FastAPI
+-   **后端**：Python 3.9+, FastAPI (Docker 部署)
+-   **无服务器**：Cloudflare Worker, Cloudflare R2 (Worker 部署)
 -   **前端**：HTML, CSS, JavaScript (内联)
--   **容器化**：Docker, Docker Compose
--   **模板引擎**：Jinja2
+-   **容器化**：Docker, Docker Compose (Docker 部署)
+-   **模板引擎**：Jinja2 (Docker 部署)
 
 ## 📄 许可证
 
