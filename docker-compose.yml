@@ -1,0 +1,12 @@
+version: '3.8'
+
+services:
+  file-manager:
+    build: .
+    ports:
+      - "8399:8399"
+    volumes:
+      - ./data:/app/data
+    environment:
+      ADMIN_PASSWORD: "password" # 请替换为您的管理员密码
+    restart: always
